@@ -1,0 +1,27 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="LinkDeck.Desktop.Views.ToastWindow"
+        Title="LinkDeck notification"
+        Width="380"
+        SizeToContent="Height"
+        CanResize="False"
+        SystemDecorations="None"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        Topmost="True"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent"
+        WindowStartupLocation="Manual">
+  <Border Background="{DynamicResource DeckSurface}"
+          BorderBrush="{DynamicResource DeckSurfaceBorder}"
+          BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="6">
+    <Grid ColumnDefinitions="Auto,*">
+      <Border x:Name="Accent" Width="4" CornerRadius="2" Margin="0,2,12,2" Background="#3B82F6" />
+      <StackPanel Grid.Column="1" Spacing="2">
+        <TextBlock Text="LinkDeck" FontWeight="SemiBold" FontSize="12" />
+        <TextBlock x:Name="Message" TextWrapping="Wrap" FontSize="12.5"
+                   AutomationProperties.LiveSetting="Assertive" />
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

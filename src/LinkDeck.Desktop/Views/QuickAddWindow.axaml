@@ -1,0 +1,93 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:LinkDeck.Desktop.ViewModels"
+        xmlns:core="using:LinkDeck.Core.Abstractions"
+        x:Class="LinkDeck.Desktop.Views.QuickAddWindow"
+        x:DataType="vm:QuickAddViewModel"
+        Title="Add to LinkDeck"
+        Width="460"
+        SizeToContent="Height"
+        CanResize="False"
+        Topmost="True"
+        WindowStartupLocation="CenterScreen"
+        Icon="avares://LinkDeck/Assets/linkdeck.ico">
+  <StackPanel Margin="20,14,20,18">
+    <Expander x:Name="AppPicker" Header="Choose an app (open now or from the Start menu)"
+              IsVisible="{Binding HasAppPicker}" HorizontalAlignment="Stretch" Margin="0,0,0,4"
+              AutomationProperties.Name="Choose an app">
+      <StackPanel Spacing="6">
+        <TextBox Text="{Binding AppQuery}" Watermark="Filter apps…" AutomationProperties.Name="Filter apps" />
+        <TextBlock Text="Loading apps…" Classes="muted" FontSize="12" IsVisible="{Binding IsLoadingApps}" />
+        <ListBox ItemsSource="{Binding Apps}" SelectedItem="{Binding SelectedApp}" MaxHeight="220"
+                 AutomationProperties.Name="Apps">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="core:AppCandidate">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="1" Text="open now" Classes="muted" FontSize="11" Margin="8,0,0,0"
+                           IsVisible="{Binding IsRunning}" VerticalAlignment="Center" />
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </StackPanel>
+    </Expander>
+
+    <TextBlock Classes="label" Text="Type" />
+    <ComboBox ItemsSource="{Binding Types}" SelectedIndex="{Binding TypeIndex}" HorizontalAlignment="Stretch"
+              AutomationProperties.Name="Item type" />
+
+    <TextBlock Classes="label" Text="{Binding TargetLabel}" />
+    <DockPanel>
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4" Margin="6,0,0,0">
+        <Button Content="File…" Click="OnBrowseFile" ToolTip.Tip="Pick a file, program or shortcut" AutomationProperties.Name="Browse for a file" />
+        <Button Content="Folder…" Click="OnBrowseFolder" ToolTip.Tip="Pick a folder" AutomationProperties.Name="Browse for a folder" />
+      </StackPanel>
+      <TextBox x:Name="TargetBox" Text="{Binding Target}" Watermark="{Binding TargetWatermark}"
+               AutomationProperties.Name="Target" />
+    </DockPanel>
+
+    <TextBlock Classes="label" Text="Name" />
+    <TextBox Text="{Binding Name}" Watermark="Leave empty to use a suggested name"
+             AutomationProperties.Name="Name" />
+
+    <StackPanel IsVisible="{Binding IsPath}">
+      <TextBlock Classes="label" Text="Arguments (optional; check them when adding a shortcut)" />
+      <TextBox Text="{Binding Args}" AutomationProperties.Name="Arguments" />
+      <TextBlock Classes="label" Text="Start in (optional)" />
+      <TextBox Text="{Binding WorkingDir}" AutomationProperties.Name="Working directory" />
+    </StackPanel>
+
+    <StackPanel IsVisible="{Binding IsRdp}">
+      <TextBlock Classes="label" Text="Username (optional; passwords are never stored)" />
+      <TextBox Text="{Binding Username}" AutomationProperties.Name="Username" />
+    </StackPanel>
+
+    <TextBlock Classes="label" Text="Group" />
+    <DockPanel>
+      <Button DockPanel.Dock="Right" Margin="6,0,0,0" Command="{Binding ToggleNewGroupCommand}"
+              Content="{Binding NewGroupButtonText}"
+              AutomationProperties.Name="Create a new group" />
+      <Panel>
+        <ComboBox ItemsSource="{Binding Groups}" SelectedItem="{Binding SelectedGroup}" HorizontalAlignment="Stretch"
+                  IsVisible="{Binding !IsCreatingGroup}" AutomationProperties.Name="Group">
+      <ComboBox.ItemTemplate>
+        <DataTemplate x:DataType="vm:GroupOption">
+          <TextBlock Text="{Binding Name}" />
+        </DataTemplate>
+      </ComboBox.ItemTemplate>
+    </ComboBox>
+        <TextBox Text="{Binding NewGroupName}" Watermark="Name of the new group" IsVisible="{Binding IsCreatingGroup}"
+                 AutomationProperties.Name="New group name" />
+      </Panel>
+    </DockPanel>
+
+    <TextBlock Classes="error" Margin="0,10,0,0" Text="{Binding Error}" IsVisible="{Binding HasError}" />
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,16,0,0">
+      <TextBlock Classes="muted" VerticalAlignment="Center" FontSize="12" Text="Enter saves · Esc cancels" Margin="0,0,8,0" />
+      <Button Content="Cancel" Click="OnCancel" />
+      <Button Content="Add" Classes="accent" Click="OnSave" IsDefault="True" />
+    </StackPanel>
+  </StackPanel>
+</Window>

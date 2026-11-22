@@ -1,0 +1,198 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:LinkDeck.Desktop.ViewModels"
+        x:Class="LinkDeck.Desktop.Views.PopupWindow"
+        x:DataType="vm:PopupViewModel"
+        Title="LinkDeck"
+        SizeToContent="WidthAndHeight"
+        CanResize="True"
+        SystemDecorations="None"
+        ShowInTaskbar="False"
+        Topmost="True"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent"
+        WindowStartupLocation="Manual"
+        DragDrop.AllowDrop="True"
+        AutomationProperties.Name="LinkDeck launcher">
+  <Panel x:Name="Root" Margin="8">
+  <!-- Background layer: its opacity is the "background transparency" setting; content above stays opaque. -->
+  <Border x:Name="Surface" Background="{DynamicResource DeckSurface}" CornerRadius="14"
+          Opacity="{Binding BackgroundOpacity}" />
+  <Border BorderBrush="{DynamicResource DeckSurfaceBorder}"
+          BorderThickness="1"
+          CornerRadius="14"
+          Padding="16,14,16,10">
+    <DockPanel>
+      <!-- Grab bar: always there to move the launcher, however many groups there are. -->
+      <Border x:Name="DragHandle" DockPanel.Dock="Top" Height="18" Margin="-8,-8,-8,6" Background="Transparent"
+              Cursor="SizeAll" ToolTip.Tip="Drag to move the launcher" AutomationProperties.Name="Move the launcher">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="6">
+          <PathIcon Data="{StaticResource GlyphGrip}" Width="14" Height="10" Foreground="{DynamicResource DeckMuted}" />
+          <TextBlock Text="LinkDeck" FontSize="11" Classes="muted" VerticalAlignment="Center" />
+          <PathIcon Data="{StaticResource GlyphGrip}" Width="14" Height="10" Foreground="{DynamicResource DeckMuted}" />
+        </StackPanel>
+      </Border>
+
+      <!-- Search and add -->
+      <DockPanel DockPanel.Dock="Top" IsVisible="{Binding !IsCycling}">
+        <Button x:Name="MainMenuButton" DockPanel.Dock="Left" Margin="0,0,8,0" Padding="9,8" Focusable="False"
+                ToolTip.Tip="Menu: settings, keep open, add" AutomationProperties.Name="Menu">
+          <PathIcon Data="{StaticResource GlyphMenu}" Width="16" Height="16" />
+          <Button.Flyout>
+            <MenuFlyout Placement="BottomEdgeAlignedLeft">
+              <MenuItem x:Name="MenuSettings" Header="Settings…" />
+              <MenuItem x:Name="MenuKeepOpen" Header="Keep open" ToggleType="CheckBox" />
+              <MenuItem x:Name="MenuManualOrder" Header="Manual order (drag tiles to arrange)" ToggleType="CheckBox" />
+              <MenuItem x:Name="MenuCenter" Header="Center on screen" />
+              <Separator />
+              <MenuItem x:Name="MenuAddItem" Header="Add item…" />
+              <MenuItem x:Name="MenuNewGroup" Header="New group…" />
+            </MenuFlyout>
+          </Button.Flyout>
+        </Button>
+        <Button DockPanel.Dock="Right" Margin="8,0,0,0" Padding="12,6" FontSize="18"
+                Content="+" Command="{Binding QuickAddCommand}" Focusable="False"
+                ToolTip.Tip="Add a web page, app, file, folder or remote desktop (Ctrl+N)"
+                AutomationProperties.Name="Add item" />
+        <TextBox x:Name="SearchBox"
+               Text="{Binding SearchText}"
+               Watermark="Type to search…"
+               FontSize="16"
+               Padding="10,8"
+               AutomationProperties.Name="Search items" />
+      </DockPanel>
+
+      <!-- Tabs: All, kinds, groups. Right-click a group tab to rename or delete it. -->
+      <DockPanel DockPanel.Dock="Top" Margin="0,8,0,4">
+        <Button DockPanel.Dock="Right" Content="+ Group" Padding="10,4" FontSize="12" VerticalAlignment="Center"
+                Focusable="False" Command="{Binding NewGroupCommand}" IsVisible="{Binding !IsCycling}"
+                ToolTip.Tip="Create your own group. Right-click a group tab to rename or delete it; right-click an item to move it."
+                AutomationProperties.Name="New group" />
+      <TabStrip x:Name="TabBar"
+                ItemsSource="{Binding Tabs}"
+                SelectedIndex="{Binding SelectedTabIndex}"
+                Focusable="False"
+                AutomationProperties.Name="Groups">
+        <TabStrip.ItemTemplate>
+          <DataTemplate x:DataType="vm:TabViewModel">
+            <TextBlock Text="{Binding Name}" FontSize="13" />
+          </DataTemplate>
+        </TabStrip.ItemTemplate>
+      </TabStrip>
+      </DockPanel>
+
+      <!-- Footer -->
+      <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,Auto" Margin="2,8,2,0">
+        <TextBlock Grid.Column="0" Classes="muted" FontSize="12"
+                   Text="{Binding FooterTarget}"
+                   TextTrimming="CharacterEllipsis"
+                   AutomationProperties.LiveSetting="Polite" />
+        <TextBlock Grid.Column="1" Classes="muted" FontSize="11" Margin="12,0,0,0"
+                   Text="{Binding FooterHints}" />
+      </Grid>
+      <TextBlock DockPanel.Dock="Bottom" Margin="2,6,0,0" FontSize="12"
+                 Foreground="{DynamicResource DeckWarning}"
+                 IsVisible="{Binding IsReadOnly}"
+                 Text="Configuration is read-only (invalid JSON or newer version). Changes cannot be saved." />
+
+      <!-- Tiles -->
+      <ScrollViewer x:Name="Scroller" MaxHeight="448" HorizontalAlignment="Left" VerticalAlignment="Top"
+                    HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <Panel>
+          <ItemsControl x:Name="Tiles" ItemsSource="{Binding Items}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel Orientation="Horizontal" ItemWidth="122" ItemHeight="112"
+                           HorizontalAlignment="Left" VerticalAlignment="Top" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ItemTileViewModel">
+                <Button Classes="tile"
+                        Classes.selected="{Binding IsSelected}"
+                        Classes.dragging="{Binding IsDragging}"
+                        Command="{Binding $parent[ItemsControl].((vm:PopupViewModel)DataContext).LaunchTileCommand}"
+                        CommandParameter="{Binding}"
+                        ToolTip.Tip="{Binding Target}"
+                        AutomationProperties.Name="{Binding AutomationName}">
+                  <Grid RowDefinitions="*,Auto,Auto,Auto">
+                    <Border Grid.RowSpan="4" Margin="-4" CornerRadius="8" Background="{Binding Tint}" />
+                    <!-- Drop position while arranging: a bold bar on the side the dragged tile will land. -->
+                    <Border Grid.RowSpan="4" Width="5" Margin="-11,-4,0,-4" CornerRadius="3" HorizontalAlignment="Left"
+                            Background="{DynamicResource DeckTileSelectedBorder}" IsVisible="{Binding DropBefore}" />
+                    <Border Grid.RowSpan="4" Width="5" Margin="0,-4,-11,-4" CornerRadius="3" HorizontalAlignment="Right"
+                            Background="{DynamicResource DeckTileSelectedBorder}" IsVisible="{Binding DropAfter}" />
+                    <Border Grid.Row="0" Width="4" Height="4" CornerRadius="2"
+                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Background="{Binding GroupColor}" />
+                    <Panel Grid.Row="0" Width="40" Height="40" HorizontalAlignment="Center" VerticalAlignment="Center">
+                      <Image Source="{Binding Icon}" IsVisible="{Binding HasIcon}" Width="36" Height="36"
+                             RenderOptions.BitmapInterpolationMode="HighQuality" />
+                      <PathIcon Data="{StaticResource GlyphGlobe}" Width="32" Height="32"
+                                Foreground="{DynamicResource DeckGlyph}">
+                        <PathIcon.IsVisible>
+                          <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="!HasIcon" />
+                            <Binding Path="IsUrl" />
+                          </MultiBinding>
+                        </PathIcon.IsVisible>
+                      </PathIcon>
+                      <PathIcon Data="{StaticResource GlyphFolder}" Width="32" Height="32"
+                                Foreground="{DynamicResource DeckGlyph}">
+                        <PathIcon.IsVisible>
+                          <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="!HasIcon" />
+                            <Binding Path="IsPath" />
+                          </MultiBinding>
+                        </PathIcon.IsVisible>
+                      </PathIcon>
+                      <PathIcon Data="{StaticResource GlyphMonitor}" Width="32" Height="32"
+                                Foreground="{DynamicResource DeckGlyph}">
+                        <PathIcon.IsVisible>
+                          <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="!HasIcon" />
+                            <Binding Path="IsRdp" />
+                          </MultiBinding>
+                        </PathIcon.IsVisible>
+                      </PathIcon>
+                    </Panel>
+                    <TextBlock Grid.Row="1" Text="{Binding Name}" FontSize="12.5"
+                               HorizontalAlignment="Center" TextAlignment="Center"
+                               TextTrimming="CharacterEllipsis" MaxLines="2" TextWrapping="Wrap" />
+                    <Border Grid.Row="2" Width="28" Height="3" CornerRadius="2" Margin="0,3,0,1" HorizontalAlignment="Center"
+                            Background="{Binding ItemColor}" IsVisible="{Binding HasItemColor}" />
+                    <TextBlock Grid.Row="3" Text="{Binding ShortcutHint}" Classes="muted" FontSize="10"
+                               HorizontalAlignment="Center" />
+                  </Grid>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock IsVisible="{Binding IsEmpty}" Classes="muted" Margin="0,36"
+                     HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                     Text="Nothing here yet. Drop a link, file or folder, or press Ctrl+N." />
+        </Panel>
+      </ScrollViewer>
+    </DockPanel>
+  </Border>
+  <!-- Resize like a terminal: drag any edge or corner; the size snaps to whole tiles (columns × rows). -->
+  <Border x:Name="EdgeTop" Tag="North" Height="5" VerticalAlignment="Top" Margin="10,0" Background="Transparent" Cursor="TopSide" />
+  <Border x:Name="EdgeBottom" Tag="South" Height="5" VerticalAlignment="Bottom" Margin="10,0" Background="Transparent" Cursor="BottomSide" />
+  <Border x:Name="EdgeLeft" Tag="West" Width="5" HorizontalAlignment="Left" Margin="0,10" Background="Transparent" Cursor="LeftSide" />
+  <Border x:Name="EdgeRight" Tag="East" Width="5" HorizontalAlignment="Right" Margin="0,10" Background="Transparent" Cursor="RightSide" />
+  <Border x:Name="EdgeTopLeft" Tag="NorthWest" Width="10" Height="10" HorizontalAlignment="Left" VerticalAlignment="Top" Background="Transparent" Cursor="TopLeftCorner" />
+  <Border x:Name="EdgeTopRight" Tag="NorthEast" Width="10" Height="10" HorizontalAlignment="Right" VerticalAlignment="Top" Background="Transparent" Cursor="TopRightCorner" />
+  <Border x:Name="EdgeBottomLeft" Tag="SouthWest" Width="10" Height="10" HorizontalAlignment="Left" VerticalAlignment="Bottom" Background="Transparent" Cursor="BottomLeftCorner" />
+  <Border x:Name="ResizeGrip" Tag="SouthEast" Width="18" Height="18" Margin="0,0,3,3" Background="Transparent"
+          HorizontalAlignment="Right" VerticalAlignment="Bottom" Cursor="BottomRightCorner"
+          ToolTip.Tip="Drag any edge or corner to resize (snaps to whole tiles)" AutomationProperties.Name="Resize the launcher">
+    <PathIcon Data="{StaticResource GlyphResize}" Width="10" Height="10" Foreground="{DynamicResource DeckMuted}" />
+  </Border>
+  <!-- PuTTY-style size readout while resizing. -->
+  <Border x:Name="SizeReadout" IsVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center"
+          Background="{DynamicResource DeckSurface}" BorderBrush="{DynamicResource DeckSurfaceBorder}" BorderThickness="1"
+          CornerRadius="8" Padding="16,8">
+    <TextBlock x:Name="SizeReadoutText" FontSize="22" FontWeight="SemiBold" />
+  </Border>
+  </Panel>
+</Window>

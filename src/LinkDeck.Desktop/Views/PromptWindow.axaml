@@ -1,0 +1,19 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="LinkDeck.Desktop.Views.PromptWindow"
+        Width="400"
+        SizeToContent="Height"
+        CanResize="False"
+        Topmost="True"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterScreen"
+        Icon="avares://LinkDeck/Assets/linkdeck.ico">
+  <StackPanel Margin="20,16,20,18" Spacing="10">
+    <TextBlock x:Name="Message" TextWrapping="Wrap" />
+    <TextBox x:Name="Input" AutomationProperties.Name="Name" />
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,6,0,0">
+      <Button x:Name="CancelButton" Content="Cancel" />
+      <Button x:Name="OkButton" Classes="accent" IsDefault="True" />
+    </StackPanel>
+  </StackPanel>
+</Window>

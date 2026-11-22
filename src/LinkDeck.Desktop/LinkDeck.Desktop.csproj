@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- Windows-only for the MVP because it references Platform.Windows. A Linux/macOS adapter would add conditional references. -->
+    <TargetFramework>net10.0-windows10.0.17763.0</TargetFramework>
+    <RootNamespace>LinkDeck.Desktop</RootNamespace>
+    <AssemblyName>LinkDeck</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\linkdeck.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
+    <IsAotCompatible>true</IsAotCompatible>
+    <!-- Always set (not only on the publish command line) so packages.lock.json includes the NativeAOT compiler packages. -->
+    <PublishAot>true</PublishAot>
+    <!-- Avalonia 11.3 marks IDataObject (drag and drop) obsolete; the replacement API is not stable across 11.x yet. -->
+    <NoWarn>$(NoWarn);CS0618</NoWarn>
+  </PropertyGroup>
+
+  <!-- Release publish (dotnet publish -r <rid>) only; PublishAot is always true for the lock file, plain builds stay unchanged. -->
+  <PropertyGroup Condition="'$(PublishAot)' == 'true' and '$(RuntimeIdentifier)' != ''">
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <TrimMode>full</TrimMode>
+    <OptimizationPreference>Speed</OptimizationPreference>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Controls.ColorPicker" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="SharpHook" />
+    <PackageReference Include="Velopack" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LinkDeck.Core\LinkDeck.Core.csproj" />
+    <ProjectReference Include="..\LinkDeck.Platform.Windows\LinkDeck.Platform.Windows.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="LinkDeck.Desktop.Tests" />
+  </ItemGroup>
+
+</Project>

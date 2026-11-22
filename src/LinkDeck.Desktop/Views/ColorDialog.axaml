@@ -1,0 +1,28 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="LinkDeck.Desktop.Views.ColorDialog"
+        Title="Choose a colour"
+        Width="420"
+        SizeToContent="Height"
+        CanResize="False"
+        Topmost="True"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterScreen"
+        Icon="avares://LinkDeck/Assets/linkdeck.ico">
+  <StackPanel Margin="16" Spacing="12">
+    <TextBlock x:Name="Message" TextWrapping="Wrap" />
+    <ColorView x:Name="Picker"
+               ColorSpectrumShape="Ring"
+               IsAlphaEnabled="False"
+               IsAlphaVisible="False"
+               IsColorPaletteVisible="True"
+               IsColorComponentsVisible="False"
+               IsHexInputVisible="True"
+               AutomationProperties.Name="Colour wheel" />
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button x:Name="NoColorButton" Content="No colour" ToolTip.Tip="Remove the colour" />
+      <Button x:Name="CancelButton" Content="Cancel" />
+      <Button x:Name="OkButton" Content="OK" Classes="accent" IsDefault="True" />
+    </StackPanel>
+  </StackPanel>
+</Window>

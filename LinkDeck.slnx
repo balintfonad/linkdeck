@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LinkDeck.Core/LinkDeck.Core.csproj" />
+    <Project Path="src/LinkDeck.Platform.Windows/LinkDeck.Platform.Windows.csproj" />
+    <Project Path="src/LinkDeck.Desktop/LinkDeck.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LinkDeck.Core.Tests/LinkDeck.Core.Tests.csproj" />
+    <Project Path="tests/LinkDeck.Platform.Windows.Tests/LinkDeck.Platform.Windows.Tests.csproj" />
+    <Project Path="tests/LinkDeck.Desktop.Tests/LinkDeck.Desktop.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="config.example.json" />
+    <File Path="schema/config.schema.json" />
+  </Folder>
+</Solution>
