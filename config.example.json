@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/balintfonad/linkdeck/main/schema/config.schema.json",
+  "version": 1,
+  "settings": {
+    "hotkey": { "hold": "Alt", "step": "Ctrl" },
+    "theme": "system",
+    "startWithWindows": true,
+    "sortMode": "frecency"
+  },
+  "groups": [
+    {
+      "id": "work",
+      "name": "Work",
+      "color": "#3B82F6",
+      "items": [
+        { "id": "7f3c2a10-5b1e-4c55-9a43-1d2e3f405061", "type": "url", "name": "Issue tracker", "url": "https://issues.example.com" },
+        { "id": "a1b2c3d4-0000-4000-8000-000000000002", "type": "path", "name": "Projects", "path": "%USERPROFILE%\\Projects" },
+        { "id": "b3c4d5e6-0000-4000-8000-000000000003", "type": "path", "name": "Notepad", "path": "%WINDIR%\\System32\\notepad.exe", "args": "", "workingDir": "%USERPROFILE%" },
+        { "id": "e5f6a7b8-0000-4000-8000-000000000004", "type": "rdp", "name": "Test server", "host": "server.example.com", "port": 3389, "username": "admin" }
+      ]
+    },
+    {
+      "id": "personal",
+      "name": "Personal",
+      "color": "#10B981",
+      "items": [
+        { "id": "c0ffee00-0000-4000-8000-000000000005", "type": "url", "name": "Example", "url": "https://example.org" },
+        { "id": "c0ffee00-0000-4000-8000-000000000006", "type": "path", "name": "Downloads", "path": "%USERPROFILE%\\Downloads" }
+      ]
+    }
+  ]
+}

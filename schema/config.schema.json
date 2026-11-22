@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/balintfonad/linkdeck/main/schema/config.schema.json",
+  "title": "LinkDeck configuration",
+  "description": "Items, groups and settings for LinkDeck. JSON comments are not allowed: GUI saves would discard them.",
+  "type": "object",
+  "required": ["version", "groups"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": {
+      "description": "Configuration format version.",
+      "type": "integer",
+      "const": 1
+    },
+    "settings": { "$ref": "#/$defs/settings" },
+    "groups": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/group" }
+    },
+    "allOrder": {
+      "description": "Hand-arranged order of the \"All\" tab (item ids). Does not change which group an item belongs to.",
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "settings": {
+      "type": "object",
+      "properties": {
+        "hotkey": { "$ref": "#/$defs/hotkey" },
+        "theme": {
+          "description": "Popup and window theme.",
+          "enum": ["system", "light", "dark"],
+          "default": "system"
+        },
+        "startWithWindows": { "type": "boolean", "default": true },
+        "sortMode": {
+          "description": "Order of items when the search box is empty.",
+          "enum": ["frecency", "manual"],
+          "default": "frecency"
+        },
+        "keepOpen": {
+          "description": "Keep the launcher open after launching an item or clicking elsewhere. Only Esc closes it.",
+          "type": "boolean",
+          "default": false
+        },
+        "launchOnRelease": {
+          "description": "Releasing the held key after stepping launches the selected item. When false the launcher stays open on the selection and Enter launches it.",
+          "type": "boolean",
+          "default": true
+        },
+        "backgroundOpacity": {
+          "description": "Opacity of the launcher background: 0.5 (see-through) to 1 (solid). Tiles and text stay readable.",
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 1,
+          "default": 1
+        },
+        "blur": {
+          "description": "Blur behind a see-through launcher: none (sharp, default), light (soft Windows blur) or strong (Windows acrylic).",
+          "enum": ["none", "light", "strong"],
+          "default": "none"
+        },
+        "popupColumns": {
+          "description": "Launcher width in tile columns, like a terminal's columns (2–20).",
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 20,
+          "default": 6
+        },
+        "popupRows": {
+          "description": "Launcher height in tile rows (1–15); 0 fits the content.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 15,
+          "default": 0
+        }
+      }
+    },
+    "hotkey": {
+      "description": "Alt+Tab-style gesture: press hold+step to open, keep holding and tap step to move, release hold to open the selection. Alt means the left Alt key (AltGr never triggers).",
+      "type": "object",
+      "required": ["hold", "step"],
+      "additionalProperties": false,
+      "properties": {
+        "hold": { "enum": ["Ctrl", "Alt", "Win"], "default": "Alt" },
+        "step": { "enum": ["Ctrl", "Alt", "Win"], "default": "Ctrl" }
+      },
+      "not": {
+        "anyOf": [
+          { "properties": { "hold": { "const": "Ctrl" }, "step": { "const": "Ctrl" } } },
+          { "properties": { "hold": { "const": "Alt" }, "step": { "const": "Alt" } } },
+          { "properties": { "hold": { "const": "Win" }, "step": { "const": "Win" } } }
+        ]
+      },
+      "default": { "hold": "Alt", "step": "Ctrl" }
+    },
+    "group": {
+      "type": "object",
+      "required": ["id", "name", "items"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/item" }
+        }
+      }
+    },
+    "itemBase": {
+      "type": "object",
+      "required": ["id", "type", "name"],
+      "properties": {
+        "id": { "description": "Unique id (GUID string).", "type": "string", "minLength": 1 },
+        "type": { "enum": ["url", "path", "rdp"] },
+        "name": { "type": "string", "minLength": 1 },
+        "icon": { "description": "Optional icon file path. Resolved automatically when absent.", "type": "string" },
+        "color": { "description": "Optional #RRGGBB accent colour for the tile.", "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+      }
+    },
+    "item": {
+      "allOf": [{ "$ref": "#/$defs/itemBase" }],
+      "oneOf": [
+        { "$ref": "#/$defs/urlItem" },
+        { "$ref": "#/$defs/pathItem" },
+        { "$ref": "#/$defs/rdpItem" }
+      ]
+    },
+    "urlItem": {
+      "properties": {
+        "type": { "const": "url" },
+        "url": {
+          "description": "http or https only.",
+          "type": "string",
+          "pattern": "^[Hh][Tt][Tt][Pp][Ss]?://[^\\s]+$"
+        }
+      },
+      "required": ["type", "url"]
+    },
+    "pathItem": {
+      "properties": {
+        "type": { "const": "path" },
+        "path": {
+          "description": "Folder, file or executable. Environment variables such as %USERPROFILE% are expanded.",
+          "type": "string",
+          "minLength": 1
+        },
+        "args": { "description": "Command-line arguments (executables).", "type": "string" },
+        "workingDir": { "type": "string" }
+      },
+      "required": ["type", "path"]
+    },
+    "rdpItem": {
+      "properties": {
+        "type": { "const": "rdp" },
+        "host": {
+          "description": "Hostname, IPv4 or IPv6 address.",
+          "type": "string",
+          "pattern": "^([A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*|[0-9A-Fa-f:.]*:[0-9A-Fa-f:.]*)$"
+        },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535, "default": 3389 },
+        "username": { "description": "Optional. Passwords are never stored.", "type": "string" }
+      },
+      "required": ["type", "host"]
+    }
+  }
+}
