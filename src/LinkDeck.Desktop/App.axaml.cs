@@ -157,7 +157,7 @@ public partial class App : Application
         settingsItem.Click += (_, _) => OpenSettings();
         var openConfig = new NativeMenuItem("Open config file");
         openConfig.Click += (_, _) => _runner.Start(new System.Diagnostics.ProcessStartInfo(_deck!.ConfigPath) { UseShellExecute = true });
-        _pauseItem = new NativeMenuItem("Pause hotkey") { ToggleType = NativeMenuItemToggleType.CheckBox };
+        _pauseItem = new NativeMenuItem("Pause hotkey") { ToggleType = MenuItemToggleType.CheckBox };
         _pauseItem.Click += (_, _) => TogglePause();
         var exit = new NativeMenuItem("Exit");
         exit.Click += (_, _) => (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Shutdown();

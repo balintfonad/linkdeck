@@ -13,9 +13,10 @@ namespace LinkDeck.Desktop.Views;
 
 public partial class SettingsWindow : Window
 {
-    private const string ReorderFormat = "application/x-linkdeck-reorder";
+    private static readonly DataFormat<string> ReorderFormat = DataFormat.CreateStringApplicationFormat("linkdeck-reorder");
 
     private Point? _dragStart;
+    private PointerPressedEventArgs? _dragPress;
     private ListBox? _dragList;
     private int _dragIndex = -1;
 
@@ -127,11 +128,12 @@ public partial class SettingsWindow : Window
         _dragIndex = container is null ? -1 : list.IndexFromContainer(container);
         _dragList = list;
         _dragStart = _dragIndex >= 0 ? e.GetPosition(list) : null;
+        _dragPress = _dragStart is null ? null : e;
     }
 
     private async void OnListPointerMoved(object? sender, PointerEventArgs e)
     {
-        if (_dragStart is not { } start || sender is not ListBox list || list != _dragList || Vm is not { CanEdit: true })
+        if (_dragStart is not { } start || _dragPress is not { } press || sender is not ListBox list || list != _dragList || Vm is not { CanEdit: true })
         {
             return;
         }
@@ -143,18 +145,18 @@ public partial class SettingsWindow : Window
         }
 
         _dragStart = null;
-        var data = new DataObject();
-        data.Set(ReorderFormat, $"{list.Name}:{_dragIndex}");
-        await DragDrop.DoDragDrop(e, data, DragDropEffects.Move | DragDropEffects.Copy);
+        var data = new DataTransfer();
+        data.Add(DataTransferItem.Create(ReorderFormat, $"{list.Name}:{_dragIndex}"));
+        await DragDrop.DoDragDropAsync(press, data, DragDropEffects.Move | DragDropEffects.Copy);
     }
 
     // ---- Drop: reorder or add -------------------------------------------
 
     private void OnDragOver(object? sender, DragEventArgs e)
     {
-        e.DragEffects = e.Data.Contains(ReorderFormat)
+        e.DragEffects = e.DataTransfer.Contains(ReorderFormat)
             ? (e.KeyModifiers.HasFlag(KeyModifiers.Control) ? DragDropEffects.Copy : DragDropEffects.Move)
-            : DropDataReader.CanRead(e.Data) ? DragDropEffects.Copy | DragDropEffects.Link : DragDropEffects.None;
+            : DropDataReader.CanRead(e.DataTransfer) ? DragDropEffects.Copy | DragDropEffects.Link : DragDropEffects.None;
         e.Handled = true;
     }
 
@@ -166,7 +168,7 @@ public partial class SettingsWindow : Window
             return;
         }
 
-        if (e.Data.Get(ReorderFormat) is string token)
+        if (e.DataTransfer.TryGetValue(ReorderFormat) is { } token)
         {
             var parts = token.Split(':');
             var list = parts[0] == GroupList.Name ? GroupList : ItemList;
@@ -209,7 +211,7 @@ public partial class SettingsWindow : Window
             return;
         }
 
-        var result = DropParser.Parse(DropDataReader.Read(e.Data, ShellItems));
+        var result = DropParser.Parse(DropDataReader.Read(e.DataTransfer, ShellItems));
         foreach (var draft in result.Drafts)
         {
             vm.AddDraft(draft);

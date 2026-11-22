@@ -11,20 +11,20 @@ public static class DropDataReader
 {
     // Windows browser formats: Chromium/Edge provide UniformResourceLocatorW + FileGroupDescriptorW ("Title.url"),
     // Firefox provides text/x-moz-url ("url\ntitle").
-    private const string UrlFormat = "UniformResourceLocatorW";
-    private const string UrlFormatAnsi = "UniformResourceLocator";
-    private const string FileGroupDescriptor = "FileGroupDescriptorW";
-    private const string MozUrl = "text/x-moz-url";
-    private const string UriList = "text/uri-list";
-    private const string ShellIdList = "Shell IDList Array";
+    private static readonly DataFormat<byte[]> UrlFormat = DataFormat.CreateBytesPlatformFormat("UniformResourceLocatorW");
+    private static readonly DataFormat<byte[]> UrlFormatAnsi = DataFormat.CreateBytesPlatformFormat("UniformResourceLocator");
+    private static readonly DataFormat<byte[]> FileGroupDescriptor = DataFormat.CreateBytesPlatformFormat("FileGroupDescriptorW");
+    private static readonly DataFormat<byte[]> MozUrl = DataFormat.CreateBytesPlatformFormat("text/x-moz-url");
+    private static readonly DataFormat<byte[]> UriList = DataFormat.CreateBytesPlatformFormat("text/uri-list");
+    private static readonly DataFormat<byte[]> ShellIdList = DataFormat.CreateBytesPlatformFormat("Shell IDList Array");
 
-    public static bool CanRead(IDataObject data) =>
-        data.Contains(DataFormats.Files) || data.Contains(DataFormats.Text)
+    public static bool CanRead(IDataTransfer data) =>
+        data.Contains(DataFormat.File) || data.Contains(DataFormat.Text)
         || data.Contains(UrlFormat) || data.Contains(UrlFormatAnsi) || data.Contains(MozUrl) || data.Contains(UriList) || data.Contains(ShellIdList);
 
-    public static DropData Read(IDataObject data, IShellIdListResolver? shellItems = null)
+    public static DropData Read(IDataTransfer data, IShellIdListResolver? shellItems = null)
     {
-        var files = data.GetFiles()?
+        var files = data.TryGetFiles()?
             .Select(f => f.TryGetLocalPath())
             .Where(p => !string.IsNullOrEmpty(p))
             .Select(p => p!)
@@ -50,12 +50,7 @@ public static class DropDataReader
         IReadOnlyList<ShellItemInfo> shell = [];
         if (files.Count == 0 && shellItems is not null && data.Contains(ShellIdList))
         {
-            var bytes = data.Get(ShellIdList) switch
-            {
-                byte[] b => b,
-                MemoryStream ms => ms.ToArray(),
-                _ => null,
-            };
+            var bytes = data.TryGetValue(ShellIdList);
             if (bytes is not null)
             {
                 shell = shellItems.Resolve(bytes);
@@ -68,40 +63,19 @@ public static class DropDataReader
             ShellItems = shell,
             Url = string.IsNullOrWhiteSpace(url) ? null : url.Trim(),
             UrlTitle = string.IsNullOrWhiteSpace(title) ? null : title.Trim(),
-            Text = files.Count == 0 ? data.GetText() : null,
+            Text = files.Count == 0 ? data.TryGetText() : null,
         };
     }
 
-    private static string? ReadString(IDataObject data, string format, Encoding encoding)
-    {
-        if (!data.Contains(format))
-        {
-            return null;
-        }
-
-        return data.Get(format) switch
-        {
-            string s => s.TrimEnd('\0').Trim(),
-            byte[] b => encoding.GetString(b).TrimEnd('\0').Trim(),
-            MemoryStream ms => encoding.GetString(ms.ToArray()).TrimEnd('\0').Trim(),
-            _ => null,
-        };
-    }
+    private static string? ReadString(IDataTransfer data, DataFormat<byte[]> format, Encoding encoding) =>
+        data.Contains(format) && data.TryGetValue(format) is { } bytes
+            ? encoding.GetString(bytes).TrimEnd('\0').Trim()
+            : null;
 
     /// <summary>FILEGROUPDESCRIPTORW: uint count, then FILEDESCRIPTORW with cFileName (WCHAR[260]) at offset 72.</summary>
-    private static string? ReadTitleFromFileGroupDescriptor(IDataObject data)
+    private static string? ReadTitleFromFileGroupDescriptor(IDataTransfer data)
     {
-        if (!data.Contains(FileGroupDescriptor))
-        {
-            return null;
-        }
-
-        var bytes = data.Get(FileGroupDescriptor) switch
-        {
-            byte[] b => b,
-            MemoryStream ms => ms.ToArray(),
-            _ => null,
-        };
+        var bytes = data.Contains(FileGroupDescriptor) ? data.TryGetValue(FileGroupDescriptor) : null;
         const int nameOffset = 4 + 72;
         if (bytes is null || bytes.Length < nameOffset + 2)
         {

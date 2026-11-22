@@ -1,4 +1,4 @@
-using System.Text.Json.Nodes;
+using System.Text.Json;
 using Json.Schema;
 using LinkDeck.Core.Config;
 using LinkDeck.Core.Models;
@@ -10,10 +10,10 @@ public class SchemaTests
     private static readonly JsonSchema Schema = JsonSchema.FromFile(Path.Combine(AppContext.BaseDirectory, "schema", "config.schema.json"));
 
     private static EvaluationResults Validate(string json) =>
-        Schema.Evaluate(JsonNode.Parse(json), new EvaluationOptions { OutputFormat = OutputFormat.List });
+        Schema.Evaluate(JsonDocument.Parse(json).RootElement, new EvaluationOptions { OutputFormat = OutputFormat.List });
 
     private static string Describe(EvaluationResults r) =>
-        string.Join("\n", r.Details.Where(d => d.HasErrors).SelectMany(d => d.Errors!.Select(e => $"{d.InstanceLocation}: {e.Value}")));
+        string.Join("\n", (r.Details ?? []).Where(d => d.Errors is { Count: > 0 }).SelectMany(d => d.Errors!.Select(e => $"{d.InstanceLocation}: {e.Value}")));
 
     [Fact]
     public void Example_config_is_valid()

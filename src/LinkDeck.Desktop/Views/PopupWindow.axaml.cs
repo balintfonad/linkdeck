@@ -256,8 +256,9 @@ public partial class PopupWindow : Window
         Tiles.AddHandler(PointerReleasedEvent, (_, _) => _tileDragStart = null, RoutingStrategies.Tunnel, handledEventsToo: true);
     }
 
-    private const string TileFormat = "application/x-linkdeck-tile";
+    private static readonly DataFormat<string> TileFormat = DataFormat.CreateStringApplicationFormat("linkdeck-tile");
     private Point? _tileDragStart;
+    private PointerPressedEventArgs? _tilePress;
     private ItemTileViewModel? _tileDragSource;
 
     private void OnTilePointerPressed(object? sender, PointerPressedEventArgs e)
@@ -270,11 +271,12 @@ public partial class PopupWindow : Window
 
         _tileDragSource = (e.Source as Control)?.DataContext as ItemTileViewModel;
         _tileDragStart = _tileDragSource is null ? null : e.GetPosition(Tiles);
+        _tilePress = _tileDragStart is null ? null : e;
     }
 
     private async void OnTilePointerMoved(object? sender, PointerEventArgs e)
     {
-        if (_tileDragStart is not { } start || _tileDragSource is null)
+        if (_tileDragStart is not { } start || _tileDragSource is null || _tilePress is not { } press)
         {
             return;
         }
@@ -288,11 +290,11 @@ public partial class PopupWindow : Window
         _tileDragStart = null;
         var source = _tileDragSource;
         source.IsDragging = true; // picked up: faded with a dashed outline
-        var data = new DataObject();
-        data.Set(TileFormat, source.Item.Id);
+        var data = new DataTransfer();
+        data.Add(DataTransferItem.Create(TileFormat, source.Item.Id));
         try
         {
-            await DragDrop.DoDragDrop(e, data, DragDropEffects.Move);
+            await DragDrop.DoDragDropAsync(press, data, DragDropEffects.Move);
         }
         finally
         {
@@ -333,7 +335,7 @@ public partial class PopupWindow : Window
     /// <summary>A tile dropped on a tile: before it when dropped on its left half, after it on its right half.</summary>
     private bool TryDropTile(DragEventArgs e)
     {
-        if (_vm is null || e.Data.Get(TileFormat) is not string id)
+        if (_vm is null || e.DataTransfer.TryGetValue(TileFormat) is not { } id)
         {
             return false;
         }
@@ -588,14 +590,14 @@ public partial class PopupWindow : Window
 
     private void OnDragOver(object? sender, DragEventArgs e)
     {
-        if (e.Data.Contains(TileFormat))
+        if (e.DataTransfer.Contains(TileFormat))
         {
             e.DragEffects = DragDropEffects.Move;
-            ShowDropMarker(e, e.Data.Get(TileFormat) as string ?? "");
+            ShowDropMarker(e, e.DataTransfer.TryGetValue(TileFormat) ?? "");
         }
         else
         {
-            e.DragEffects = DropDataReader.CanRead(e.Data) ? DragDropEffects.Copy | DragDropEffects.Link : DragDropEffects.None;
+            e.DragEffects = DropDataReader.CanRead(e.DataTransfer) ? DragDropEffects.Copy | DragDropEffects.Link : DragDropEffects.None;
         }
 
         e.Handled = true;
@@ -609,6 +611,6 @@ public partial class PopupWindow : Window
             return;
         }
 
-        DataDropped?.Invoke(this, DropDataReader.Read(e.Data, ShellItems));
+        DataDropped?.Invoke(this, DropDataReader.Read(e.DataTransfer, ShellItems));
     }
 }
