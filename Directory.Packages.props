@@ -13,7 +13,7 @@
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 
     <!-- Platform -->
-    <PackageVersion Include="SharpHook" Version="6.2.0" />
+    <PackageVersion Include="SharpHook" Version="8.0.3" />
     <PackageVersion Include="Velopack" Version="0.0.1298" />
 
     <!-- Tests -->
