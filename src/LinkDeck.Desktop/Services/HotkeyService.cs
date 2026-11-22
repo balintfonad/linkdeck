@@ -69,7 +69,7 @@ public sealed class HotkeyService : IHotkeyService
             return;
         }
 
-        _hook = new SimpleGlobalHook(GlobalHookType.Keyboard);
+        _hook = new SimpleGlobalHook();
         _hook.KeyPressed += OnKeyPressed;
         _hook.KeyReleased += OnKeyReleased;
         _ = RunHookAsync(_hook);
@@ -103,7 +103,7 @@ public sealed class HotkeyService : IHotkeyService
     {
         try
         {
-            await hook.RunAsync().ConfigureAwait(false);
+            await hook.RunAsync(GlobalHookType.Keyboard).ConfigureAwait(false);
         }
         catch (HookException ex)
         {

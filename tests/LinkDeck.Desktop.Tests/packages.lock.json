@@ -251,7 +251,7 @@
           "CommunityToolkit.Mvvm": "[8.4.2, )",
           "LinkDeck.Core": "[0.1.0, )",
           "LinkDeck.Platform.Windows": "[0.1.0, )",
-          "SharpHook": "[6.2.0, )",
+          "SharpHook": "[8.0.3, )",
           "Velopack": "[1.2.161, )"
         }
       },
@@ -315,9 +315,9 @@
       },
       "SharpHook": {
         "type": "CentralTransitive",
-        "requested": "[6.2.0, )",
-        "resolved": "6.2.0",
-        "contentHash": "mRzpiAQ0ks6Z2lM3SWSOGBYYWwVwUJ+M6HbgQqCGO+4lxo5MulBrAlceGlJOdTWs5OmrVYV/W9BKtKQ/pOGnhg=="
+        "requested": "[8.0.3, )",
+        "resolved": "8.0.3",
+        "contentHash": "f+6QrPzGSyj877LKCiyifnJ6w+06Agh+ZZExa7oh/OXZxzGJ3ZxTXRGBKkH4qx4dVHOz90NPJ3EgVOb27zWY4w=="
       },
       "Velopack": {
         "type": "CentralTransitive",
