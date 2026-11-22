@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Build and test (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          global-json-file: global.json
+      - name: Restore (locked)
+        run: dotnet restore LinkDeck.slnx --locked-mode
+      - name: Format check
+        run: dotnet format LinkDeck.slnx --verify-no-changes --no-restore
+      - name: Build
+        run: dotnet build LinkDeck.slnx --configuration Release --no-restore
+      - name: Test
+        run: dotnet test LinkDeck.slnx --configuration Release --no-build --logger "trx" --results-directory TestResults
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: test-results-windows
+          path: TestResults
+
+  core-linux:
+    # Proves LinkDeck.Core stays platform-agnostic.
+    name: Core tests (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          global-json-file: global.json
+      - name: Test Core
+        run: dotnet test tests/LinkDeck.Core.Tests/LinkDeck.Core.Tests.csproj --configuration Release
