@@ -59,7 +59,7 @@ jobs:
       - name: Velopack installer
         shell: pwsh
         run: |
-          dotnet tool install -g vpk --version 0.0.1298
+          dotnet tool install -g vpk --version 1.2.161
           vpk pack `
             --packId LinkDeck `
             --packVersion ${{ steps.version.outputs.version }} `
