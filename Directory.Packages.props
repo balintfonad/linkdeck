@@ -14,7 +14,7 @@
 
     <!-- Platform -->
     <PackageVersion Include="SharpHook" Version="6.2.0" />
-    <PackageVersion Include="Velopack" Version="0.0.1298" />
+    <PackageVersion Include="Velopack" Version="1.2.161" />
 
     <!-- Tests -->
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
