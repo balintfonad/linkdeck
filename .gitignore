@@ -1,0 +1,29 @@
+# Build output
+bin/
+obj/
+artifacts/
+publish/
+Releases/
+*.nupkg
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+*.DotSettings.user
+.vscode/*
+!.vscode/extensions.json
+
+# Test results
+TestResults/
+*.trx
+coverage*.xml
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Local LinkDeck data (never commit personal configs)
+/config.json
+/state.json
