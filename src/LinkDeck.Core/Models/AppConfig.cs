@@ -6,7 +6,7 @@ public sealed record AppConfig
 {
     public const int CurrentVersion = 1;
 
-    public const string SchemaUrl = "https://raw.githubusercontent.com/balintfonad/linkdeck/main/schema/config.schema.json";
+    public const string SchemaUrl = "https://raw.githubusercontent.com/balintfonad/linkdeck/master/schema/config.schema.json";
 
     [JsonPropertyName("$schema")]
     public string? Schema { get; init; } = SchemaUrl;

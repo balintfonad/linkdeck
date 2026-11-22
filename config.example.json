@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/balintfonad/linkdeck/main/schema/config.schema.json",
+  "$schema": "https://raw.githubusercontent.com/balintfonad/linkdeck/master/schema/config.schema.json",
   "version": 1,
   "settings": {
     "hotkey": { "hold": "Alt", "step": "Ctrl" },

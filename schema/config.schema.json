@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/balintfonad/linkdeck/main/schema/config.schema.json",
+  "$id": "https://raw.githubusercontent.com/balintfonad/linkdeck/master/schema/config.schema.json",
   "title": "LinkDeck configuration",
   "description": "Items, groups and settings for LinkDeck. JSON comments are not allowed: GUI saves would discard them.",
   "type": "object",
