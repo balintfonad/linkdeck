@@ -1,7 +1,10 @@
 version: 2
 updates:
+  # NuGet PRs need their packages.lock.json files refreshed by hand (dotnet restore --force-evaluate)
+  # before CI can pass: Dependabot updates Directory.Packages.props, the locked restore then rejects the stale lock files.
   - package-ecosystem: nuget
     directory: /
+    target-branch: develop
     schedule:
       interval: weekly
     groups:
@@ -12,5 +15,10 @@ updates:
 
   - package-ecosystem: github-actions
     directory: /
+    target-branch: develop
     schedule:
       interval: weekly
+    groups:
+      # init and analyze must always run the same CodeQL version.
+      codeql:
+        patterns: ["github/codeql-action*"]
