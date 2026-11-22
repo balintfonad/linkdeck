@@ -346,7 +346,7 @@ public class ConfigStoreTests : IDisposable
 
         File.WriteAllText(ConfigPath, """{ "version": 1, "groups": [] }""");
 
-        var completed = await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(10)));
+        var completed = await Task.WhenAny(tcs.Task, Task.Delay(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken));
         Assert.Same(tcs.Task, completed);
         Assert.Empty((await tcs.Task).Groups);
     }

@@ -52,7 +52,7 @@ public class FaviconFetcherTests : IDisposable
         handler.Routes["https://site.example/favicon.ico"] = () => Image();
         using var fetcher = new FaviconFetcher(_dir.Path, handler);
 
-        var path = await fetcher.FetchAsync("https://site.example/some/page");
+        var path = await fetcher.FetchAsync("https://site.example/some/page", TestContext.Current.CancellationToken);
 
         Assert.NotNull(path);
         Assert.True(File.Exists(path));
@@ -68,7 +68,7 @@ public class FaviconFetcherTests : IDisposable
         handler.Routes["https://site.example/img/icon.png"] = () => Image(type: "image/png");
         using var fetcher = new FaviconFetcher(_dir.Path, handler);
 
-        Assert.NotNull(await fetcher.FetchAsync("https://site.example/"));
+        Assert.NotNull(await fetcher.FetchAsync("https://site.example/", TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -80,7 +80,7 @@ public class FaviconFetcherTests : IDisposable
         handler.Routes["https://site.example/i.svg"] = () => Image(type: "image/svg+xml");
         using var fetcher = new FaviconFetcher(_dir.Path, handler);
 
-        Assert.Null(await fetcher.FetchAsync("https://site.example/"));
+        Assert.Null(await fetcher.FetchAsync("https://site.example/", TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class FaviconFetcherTests : IDisposable
         handler.Routes["https://site.example/favicon.ico"] = () => Image(FaviconFetcher.MaxBytes + 1);
         using var fetcher = new FaviconFetcher(_dir.Path, handler);
 
-        Assert.Null(await fetcher.FetchAsync("https://site.example/"));
+        Assert.Null(await fetcher.FetchAsync("https://site.example/", TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -102,8 +102,8 @@ public class FaviconFetcherTests : IDisposable
         handler.Routes["https://b.example/favicon.ico"] = () => Redirect("file:///C:/Windows/win.ini");
         using var fetcher = new FaviconFetcher(_dir.Path, handler);
 
-        Assert.NotNull(await fetcher.FetchAsync("https://a.example/"));
-        Assert.Null(await fetcher.FetchAsync("https://b.example/"));
+        Assert.NotNull(await fetcher.FetchAsync("https://a.example/", TestContext.Current.CancellationToken));
+        Assert.Null(await fetcher.FetchAsync("https://b.example/", TestContext.Current.CancellationToken));
         Assert.DoesNotContain(handler.Requested, u => u.StartsWith("file:", StringComparison.Ordinal));
     }
 
@@ -115,7 +115,7 @@ public class FaviconFetcherTests : IDisposable
         handler.Routes["http://a.example/fav.ico"] = () => Image();
         using var fetcher = new FaviconFetcher(_dir.Path, handler);
 
-        Assert.Null(await fetcher.FetchAsync("https://a.example/"));
+        Assert.Null(await fetcher.FetchAsync("https://a.example/", TestContext.Current.CancellationToken));
         Assert.DoesNotContain(handler.Requested, u => u.StartsWith("http:", StringComparison.Ordinal));
     }
 
@@ -127,7 +127,7 @@ public class FaviconFetcherTests : IDisposable
         handler.Routes["http://192.168.1.1/apply.cgi?reboot=1"] = () => Image();
         using var fetcher = new FaviconFetcher(_dir.Path, handler);
 
-        Assert.Null(await fetcher.FetchAsync("https://evil.example/"));
+        Assert.Null(await fetcher.FetchAsync("https://evil.example/", TestContext.Current.CancellationToken));
         Assert.DoesNotContain(handler.Requested, u => u.Contains("192.168.1.1", StringComparison.Ordinal));
     }
 
@@ -139,7 +139,7 @@ public class FaviconFetcherTests : IDisposable
         handler.Routes["http://127.0.0.1:8080/admin/delete"] = () => Image();
         using var fetcher = new FaviconFetcher(_dir.Path, handler);
 
-        Assert.Null(await fetcher.FetchAsync("https://evil.example/"));
+        Assert.Null(await fetcher.FetchAsync("https://evil.example/", TestContext.Current.CancellationToken));
         Assert.DoesNotContain(handler.Requested, u => u.Contains("127.0.0.1", StringComparison.Ordinal));
     }
 
@@ -151,7 +151,7 @@ public class FaviconFetcherTests : IDisposable
         handler.Routes["http://10.0.0.6/fav.ico"] = () => Image();
         using var fetcher = new FaviconFetcher(_dir.Path, handler);
 
-        Assert.NotNull(await fetcher.FetchAsync("http://10.0.0.5/wiki"));
+        Assert.NotNull(await fetcher.FetchAsync("http://10.0.0.5/wiki", TestContext.Current.CancellationToken));
     }
 
     [Theory]
@@ -183,7 +183,7 @@ public class FaviconFetcherTests : IDisposable
         var handler = new FakeHandler();
         using var fetcher = new FaviconFetcher(_dir.Path, handler);
 
-        Assert.Null(await fetcher.FetchAsync("javascript:alert(1)"));
+        Assert.Null(await fetcher.FetchAsync("javascript:alert(1)", TestContext.Current.CancellationToken));
         Assert.Empty(handler.Requested);
     }
 
