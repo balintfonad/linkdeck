@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-23
+
+Maintenance release: updated dependencies, no new features.
+
+### Changed
+
+- Updated to Avalonia 12.1.6, SharpHook 8.0.3 and Velopack 1.2.161. Drag and drop and the clipboard now use the Avalonia 12 data transfer API.
+- Installers are built with `vpk` 1.2.161, matching the Velopack version in the app.
+- Tests moved to xunit v3; release and CI workflows use the current major versions of `actions/checkout`, `actions/setup-dotnet`, `actions/upload-artifact`, `actions/download-artifact` and `github/codeql-action`.
+
 ## [0.1.0] - 2026-11-22
 
 First release.
@@ -40,5 +50,6 @@ First release.
 - **Favicons cannot reach your local network.** A public site's name must resolve to public addresses, redirects and `<link rel="icon">` targets cannot point into the local network or from `https` to `http`, and public sites are fetched without a proxy. Intranet links still get their favicons.
 - **Supply chain.** NuGet packages, including transitive ones, are pinned in `packages.lock.json` and restored in locked mode. In the release workflow only the publishing job has a write token, the tag name is validated, every GitHub Action is pinned to a commit SHA, and releases carry a build provenance attestation (`gh attestation verify <file> --repo balintfonad/linkdeck`).
 
-[Unreleased]: https://github.com/balintfonad/linkdeck/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/balintfonad/linkdeck/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/balintfonad/linkdeck/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/balintfonad/linkdeck/releases/tag/v0.1.0

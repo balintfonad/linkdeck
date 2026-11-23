@@ -24,7 +24,7 @@
     <Product>LinkDeck</Product>
     <Copyright>Copyright (c) LinkDeck contributors</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsTestProject)' == 'true' or $(MSBuildProjectName.EndsWith('.Tests'))">
